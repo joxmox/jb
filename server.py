@@ -16,7 +16,7 @@ class JbHandler(BaseHTTPRequestHandler):
     }
 
     def prelude(self):
-        print self.path
+        print(self.path)
         path = self.path
         if len(path) > 0 and path[0] == '/':
             path = path[1:]
@@ -52,7 +52,7 @@ class JbHandler(BaseHTTPRequestHandler):
 
 
     def serve_file(self, file):
-        print "serving file", file
+        print ("serving file", file)
         if os.path.exists(file):
             if '.' in file:
                 suff = (file + '.').split('.')[-2]
@@ -70,7 +70,7 @@ class JbHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.prelude():
             return
-        print "pat", self.pat
+        print ("pat", self.pat)
         if self.pat == ['']:
             self.pat = ['index.html']
         if len(self.pat) == 1:
@@ -87,7 +87,6 @@ class JbHandler(BaseHTTPRequestHandler):
 class JbServer(object):
     
     def __init__(self, port):
-        print "hej"
         self.httpd = HTTPServer(('', port), JbHandler)
 
     def start(self):

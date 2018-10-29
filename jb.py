@@ -15,16 +15,15 @@ def main():
     die()
 
 def die(signum=None, frame=None):
-    print 'exiting!'
+    print('exiting!')
     try:
         sys.exit(0)
     except SystemExit as e:
         os._exit(0)
 
 def run():
-    print "apa"
     s = JbServer(6661)
-    print s
+    print(s)
     s.start()
 #    JbServer(6661).start()
 
