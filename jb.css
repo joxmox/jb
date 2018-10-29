@@ -1,0 +1,58 @@
+br {
+    line-height : 150%;
+}
+
+.kaka {
+    border : 1px solid black;
+    width : 40px;
+    padding : 2px;
+    font-size : 20px;
+    float : left;
+    margin-right : 5px;
+    background-color : white;
+}
+
+.eol {
+    clear : left;
+}
+
+.red {
+    color : red;
+}
+
+.yel {
+    color : orange;
+}
+
+.grn {
+    color : green;
+}
+
+.blk {
+    color : black;
+}
+
+
+.val {
+    font-family : Arial;
+    font-weight : normal;
+    margin-bottom : -8px;
+}
+
+.sut {
+    font-weight : normal;
+    margin-bottom : -8px;
+}
+
+.sutr {
+    font-weight : bold;
+    margin-top : -8px;
+}
+
+
+.rot {
+    transform:rotate(-180deg);
+}
+
+
+
