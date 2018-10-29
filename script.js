@@ -1,3 +1,5 @@
+var id = 0;
+
 $(document).ready(function() {
     $("#title").text('Hej hopp');
 
@@ -12,9 +14,34 @@ $(document).ready(function() {
     $("#val4").text('K');
     $("#sut4").html('&spades;');
 
-    show_deck();
+    start_game();
 
 });
+
+function start_game() {
+    var url = '/api/game';
+    var data = {
+        'user' : 'apa'
+    }
+    ajax_post(url, data, start_succ, start_fail);
+}
+
+function start_succ(data) {
+    console.log(data);
+    id = data.id;
+    var url = '/api/game/' + id;
+    ajax_get(url, parse_next, start_fail);
+}
+
+function parse_next(data) {
+    console.log('yes');
+    console.log(data);
+}
+
+function start_fail(data) {
+    console.log("urk");
+    console.log(data);
+}
 
 function show_deck() {
     deck = $("#deck");

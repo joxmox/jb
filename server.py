@@ -2,6 +2,8 @@ from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import os
 import json
 
+from game import Games
+
 class JbHandler(BaseHTTPRequestHandler):
 
     suff_2_ctype = {
@@ -14,6 +16,8 @@ class JbHandler(BaseHTTPRequestHandler):
         'svg' : 'image/svg',
         'ico' : 'image/x-icon',
     }
+
+    games = Games()
 
     def prelude(self):
         print(self.path)
@@ -41,14 +45,19 @@ class JbHandler(BaseHTTPRequestHandler):
             self.data['ip'] = self.client_address[0]
         return status
 
-    def respond(self, code=200, ctype='text/html', length=None):
+    def respond(self, code=200, ctype='text/html', data=None):
+        print "respond", data
         self.send_response(code)
         if ctype is not None:
             self.send_header('Content-Type', ctype)
-        if length is not None:
-            self.send_header('Content-Length', length)
+        if data:
+            jdata = json.dumps(data)
+            self.send_header('Content-Length', len(jdata))
         self.end_headers()
-        
+        if data:
+            print jdata
+            self.wfile.write(jdata)
+
 
 
     def serve_file(self, file):
@@ -64,9 +73,22 @@ class JbHandler(BaseHTTPRequestHandler):
                 self.wfile.write(fh.read())
         else:
             self.respond(404)
-        
 
-    
+    def api_get(self):
+        if len(self.pat) == 2 and self.pat[0] == 'game':
+            data = JbHandler.games.next(self.pat[1])
+            print data
+            self.respond(200, data=data)
+        else:
+            self.respond(404)
+
+    def api_post(self):
+        print "post", self.pat
+        if len(self.pat) == 1 and self.pat[0] == 'game':
+            self.respond(200, data=JbHandler.games.new())
+        else:
+            self.respond(404)
+
     def do_GET(self):
         if not self.prelude():
             return
@@ -82,13 +104,20 @@ class JbHandler(BaseHTTPRequestHandler):
             else:
                 self.respond(404)
 
+    def do_POST(self):
+        if not self.prelude():
+            return
+        if len(self.pat) > 1 and self.pat[0] == 'api':
+            self.pat.pop(0)
+            self.api_post()
+        else:
+            self.respond(404)
 
 
 class JbServer(object):
-    
+
     def __init__(self, port):
         self.httpd = HTTPServer(('', port), JbHandler)
 
     def start(self):
         self.httpd.serve_forever()
-
