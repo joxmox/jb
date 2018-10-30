@@ -1,21 +1,16 @@
 var id = 0;
 
+var dispatch = {
+    'deal_info' : read_dealinfo,
+    'my_hand' : show_mycards,
+    'part_hand' : show_partner,
+    'do_bid' : do_bid
+}
+
+
 $(document).ready(function() {
     $("#title").text('Hej hopp');
-
-    $("#crd1").addClass("red");
-    $("#val1").text('J');
-    $("#sut1").html('&hearts;');
-    $("#val2").text('J');
-    $("#sut2").html('&hearts;');
-
-    $("#val3").text('K');
-    $("#sut3").html('&spades;');
-    $("#val4").text('K');
-    $("#sut4").html('&spades;');
-
     start_game();
-
 });
 
 function start_game() {
@@ -33,9 +28,23 @@ function start_succ(data) {
     ajax_get(url, parse_next, start_fail);
 }
 
+function get_next() {
+    var url = '/api/game/' + id;
+    ajax_get(url, parse_next, start_fail);
+}
+
 function parse_next(data) {
-    console.log('yes');
+    console.log('parse and dispatch: ' + data.action);
     console.log(data);
+    var action = data.action;
+    if (action in dispatch) {
+        dispatch[action](data);
+        setTimeout(get_next, 100);
+    } else {
+        if (action != 'end_game') {
+            consle.log('Invalid action: ' + action);
+        }
+    }
 }
 
 function start_fail(data) {
@@ -43,52 +52,71 @@ function start_fail(data) {
     console.log(data);
 }
 
-function show_deck() {
-    deck = $("#deck");
-    for (sut=0; sut<4; sut++) {
-        apa = $("<div>").addClass("eol");
-        for (val=0; val<13; val++) {
-            create_card(sut, val, apa);
-        }
-        deck.append(apa);
-    }
+function read_dealinfo(data) {
+    $("#id").text(data.id);
+    $("#zone").text(data.info.zone);
+    $("#dealer").text(data.info.dealer);
 }
 
-function create_card(sut, val, div) {
-    if (sut == 0) {
+function show_hand(hand, player) {
+    var arr = hand.cards.split(' ');
+    console.log(arr);
+    for (i in arr) {
+        console.log(arr[i]);
+        var card = create_card(arr[i]);
+        player.append(card);
+    }
+    var hcp = $("<div>").addClass("hcp").text('hcp: ' + hand.hcp);
+    player.append(hcp);
+}
+
+function show_mycards(data) {
+    show_hand(data.hand, $("#my_cards"));
+    
+}
+
+function show_partner(data) {
+    show_hand(data.hand, $("#my_partner"));
+}
+
+function do_bid(data) {
+    var bid = data.bid;
+    var name = bid.name;
+    var symb = bid.symb;
+    var text = bid.text;
+    var color = bid.color;
+    var bidder = "#" + data.bidder + "bid";
+    var box = $(bidder);
+    var apa = $("<span>").html(symb).addClass(color);
+    box.append($("<br>")).append(apa);
+}
+        
+
+function create_card(txt) {
+    var tmp = txt.split('');
+    var val = tmp[0];
+    var sut = tmp[1];
+    var sym;
+    var col;
+    if (sut == 'c') {
         sym = "&#x2663";
         col = "grn";
-    } else if (sut == 1) {
+    } else if (sut == 'd') {
         sym = "&#x2666";
         col = "yel";
-    } else if (sut == 2) {
+    } else if (sut == 'h') {
         sym = "&#x2665";
         col = "red";
-    } else if(sut == 3) {
+    } else if(sut == 's') {
         sym = "&#x2660";
         col = "blk";
     }
-    if (val == 8) {
-        xyz = "T";
-    } else if (val == 9) {
-        xyz = "J";
-    } else if (val == 10) {
-        xyz = "Q";
-    } else if (val == 11) {
-        xyz = "K";
-    } else if (val == 12) {
-        xyz = "A";
-    } else {
-        xyz = val + 2;
-    }
-    front_val = $("<div>").addClass("val").html(xyz);
-    front_sut = $("<div>").addClass("sut").html(sym);
-    back_val = $("<div>").addClass("val").html(xyz);
-    back_sut = $("<div>").addClass("sutr").html(sym);
-    front = $("<div>").append(front_val).append(front_sut);
-    back = $("<div>").addClass("rot").append(back_val).append(back_sut);
-    card = $("<div>").addClass("kaka").addClass(col).append(front).append(back);
-    div.append(card);
+    var front_val = $("<div>").addClass("val").html(val);
+    var front_sut = $("<div>").addClass("sut").html(sym);
+    var back_val = $("<div>").addClass("val").html(val);
+    var back_sut = $("<div>").addClass("sutr").html(sym);
+    var front = $("<div>").append(front_val).append(front_sut);
+    var back = $("<div>").addClass("rot").append(back_val).append(back_sut);
+    var card = $("<div>").addClass("kaka").addClass(col).append(front).append(back);
+    return card;
 }
-
-

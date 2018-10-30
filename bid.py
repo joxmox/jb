@@ -1,0 +1,88 @@
+class Bid(object):
+
+# sut = c,d,h,s,nt,x
+# for x, val = pass,x,xx
+# other, val = 1,2,3,4,5,6,7
+
+    @staticmethod
+    def parse(txt):
+        txt = txt.lower()
+        try:
+            if txt == 'x':
+                return Bid(1, 5)
+            elif txt == 'xx':
+                return Bid(2, 5)
+            elif txt[0] == 'p':
+                return Bid(0, 5)
+            else:
+                val = int(txt[0])
+                sym = 'cdhsn'.index(txt[1])
+                if val < 1 or val > 7:
+                    return Bid(3, 5)
+                return Bid(val - 1, sym)
+        except Exception:
+            return Bid(3, 5)
+
+    def __init__(self, val, sut):
+        self._val = val
+        self._sut = sut
+        if sut == 0:
+            self._col = 'grn'
+        elif sut == 1:
+            self._col = 'yel'
+        elif sut == 2:
+            self._col = 'red'
+        else:
+            self._col = 'blk'
+
+    def __str__(self):
+        val = self._val
+        sut = self._sut
+        if sut == 5:
+            if val == 0:
+                return 'Pass'
+            elif val == 1:
+                return 'X'
+            elif val == 2:
+                return 'XX'
+            else:
+                return '?'
+        else:
+            return str(val + 1) + 'cdhsn'[sut]
+
+    @property
+    def val(self):
+        return self._val
+
+    @property
+    def sut(self):
+        return self._sut
+
+    @property
+    def str(self):
+        return str(self)
+
+    @property
+    def col(self):
+        return self._col
+
+    @property
+    def sym(self):
+        val = self._val
+        sut = self._sut
+        if sut == 5:
+            if val == 0:
+                return 'Pass'
+            elif val == 1:
+                return 'X'
+            elif val == 2:
+                return 'XX'
+            else:
+                return '?'
+        else:
+            return str(val + 1) + ['&#x2663', '&#x2666', '&#x2665', '&#x2660'][sut]
+
+    def sutsym(self):
+        return 'cdhsn'[self._sut]
+
+

@@ -12,6 +12,15 @@ br {
     background-color : white;
 }
 
+.hcp {
+    width : 70px;
+    padding : 2px;
+    font-size : 20px;
+    float : left;
+    margin-right : 5px;
+    background-color : white;
+}
+
 .eol {
     clear : left;
 }
@@ -54,5 +63,27 @@ br {
     transform:rotate(-180deg);
 }
 
+#table {
+    background-color : green;
+    width : 100px;
+    height : 100px;
+}
+
+#bids {
+    border : none;
+    width : auto;
+}
+
+
+.bid {
+    font-family : Arial;
+    border : none;
+    float : left;
+    margin : 5px;
+}
+
+#my_cards, #my_partner {
+    height : 100px;
+}
 
 
