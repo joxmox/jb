@@ -78,13 +78,23 @@ class Hand(object):
             'text' : name,
         }
         return data
-            
-                
-        
+
+    def str_by_suit(self):
+        res = {}
+        for sut, sym in zip(range(4), ['c', 'd', 'h', 's']):
+            res[sym] = [self.fixval(c.val) for c in sorted(self.cards, reverse=True) if c.sut==sut]
+        return res
+
+    def fixval(self, num):
+        if num < 8:
+            return str(num + 2)
+        else:
+            return 'TJQKA'[num - 8];
+
 
     def __str__(self):
         return ' '.join([str(c) for c in self.cards])
-        
+
     def pretty(self):
         print [str(c) for c in self.sorted()]
         print [str(c) for c in reversed(self.sorted())]
@@ -92,3 +102,21 @@ class Hand(object):
         for sut in reversed(range(4)):
             ret += ''.join(c.valsym() if c.sut == sut else '' for c in reversed(self.sorted())) + '\n'
         return ret
+
+def main():
+    from deck import Deck
+    d = Deck().shuffle()
+    print d
+    g = d.deal()
+    print
+    for f in g:
+        print f
+    print
+    h = g[0]
+    print h
+    print
+    print h.str_by_suit()
+
+
+if __name__ == '__main__':
+    main()

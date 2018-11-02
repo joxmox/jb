@@ -14,8 +14,10 @@ br {
     padding-top : 1px;
     padding-top : 1px;
     font-size : 14px;
+/*
     float : left;
-    margin-right : 5px;
+*/
+    margin-right : 0px;
     background-color : white;
 }
 
@@ -98,3 +100,15 @@ br {
 }
 
 
+#bids {
+    font-size: 8pt;
+    background-color: gray;
+}
+
+#maintab > tbody > tr > td {    
+    height : 260px;
+}
+
+#table {
+    width : 260px;
+}

@@ -85,7 +85,7 @@ class JbHandler(BaseHTTPRequestHandler):
     def api_post(self):
         print "post", self.pat
         if len(self.pat) == 1 and self.pat[0] == 'game':
-            self.respond(200, data=JbHandler.games.new())
+            self.respond(200, data=JbHandler.games.new(self.data))
         else:
             self.respond(404)
 

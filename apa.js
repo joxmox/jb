@@ -1,4 +1,6 @@
 var id = 0;
+var bid_tab;
+var bid_tr;
 
 var dispatch = {
     'deal_info' : read_dealinfo,
@@ -13,7 +15,34 @@ $(document).ready(function() {
     $("#start").click(function() {
         start_game();
     });
+    build_page();
 });
+
+function build_page() {
+    var players = ['south','west', 'north', 'east'];
+    var suits = ['s', 'h', 'd', 'c'];
+    var bid_area = $("#bids");
+    bid_tab = $("<table>");
+    bid_area.append(bid_tab);
+    bid_tr = $("<tr>");
+    bid_tab.append(bid_tr);
+    for (var p in players) {
+        var player = players[p];
+        var td = $("<td>").text(player);
+        bid_tr.append(td);
+        var tab = $("<table>");
+        $("#" + player).append(tab);
+        for (var s in suits) {
+            var suit = suits[s];
+            var sut = $("<tr>").attr("id", player + "_" + suit);
+            tab.append(sut);
+        }
+    }
+    z = $("<tr>");
+    bid_tab.append(z);
+    bid_tr = z;
+}
+
 
 function start_game() {
     var num = $("#numin").val();
@@ -79,8 +108,8 @@ function show_hands(data) {
     var hands = data.hands;
     console.log("hands: ");
     console.log(hands);
-//    var dirs = ['south', 'west', 'north', 'east'];
-    var dirs = ['south', 'north'];
+    var dirs = ['south', 'west', 'north', 'east'];
+//    var dirs = ['south', 'north'];
     var suits = ['s', 'h', 'd', 'c'];
     for (i in dirs) {
         var dir = dirs[i];
@@ -90,8 +119,10 @@ function show_hands(data) {
             var div = $(player);
             var data = hands[dir].suited[suit];
             for (k in data) {
+                var td = $("<td>");
                 var card = create_card(data[k], suit);
-                $(player).append(card);
+                td.append(card);
+                $(player).append(td);
             }
         }
     }
@@ -109,8 +140,15 @@ function do_bid(data) {
     var color = bid.color;
     var bidder = "#" + data.bidder + "bid";
     var box = $(bidder);
-    var apa = $("<span>").html(symb).addClass(color);
-    box.append($("<br>")).append(apa);
+    var apa = $("<td>").html(symb).addClass(color);
+    console.log(symb);
+    bid_tr.append(apa);
+    if (data.bidder == 'e') {
+        z = $("<tr>");
+        bid_tab.append(z);
+        bid_tr = z;
+    }
+//    box.append($("<br>")).append(apa);
 }
         
 

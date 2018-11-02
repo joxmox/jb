@@ -1,4 +1,5 @@
 import time
+import random
 
 from deck import Deck
 from opening import *
@@ -6,8 +7,11 @@ from bid import Bid
 
 class Game(object):
 
-    def __init__(self, dealer, zone):
-        self.deck = Deck()
+    def __init__(self, id, num, dealer, zone):
+        if num == 0:
+            num = random.randint(1, 100000)
+        self.num = num
+        self.deck = Deck(num)
         self.deck.shuffle()
         self.hands = self.deck.deal()
         for h in self.hands:
@@ -19,9 +23,6 @@ class Game(object):
         self.dealer = dealer
         self.bidder = dealer
 
-    def set_id(self, id):
-        self.id = id
-        return self
 
 class Games(object):
 
@@ -31,17 +32,22 @@ class Games(object):
         self.games = {}
         self.funcmap = {
             'deal_info' : self.deal_info,
-            'my_hand' : self.my_hand,
+            'show_hands' : self.show_hands,
             'part_hand' : self.part_hand,
             'end_game' : self.end_game,
             'do_bid' : self.do_bid,
         }
 
-    def new(self):
+    def new(self, data):
         id = Games.nextid
         print "new", id
+        try:
+            num = int(data['num'])
+        except ValueError:
+            num = 0
+        print "num", num
         Games.nextid += 1
-        self.games[id] = Game(0, None).set_id(id)
+        self.games[id] = Game(id, num, 0, None)
         game = self.games[id]
         return {
             'id' : id,
@@ -65,24 +71,30 @@ class Games(object):
             'action' : state,
             'info' : {
                 'id' : game.id,
+                'num' : game.num,
                 'dealer' : ['South', 'West', 'North', 'East'][game.dealer],
                 'zone' : 'None',
             },
         }
-        game.state = 'my_hand'
+        game.state = 'show_hands'
         return data
 
-    def my_hand(self, game, state):
+    def show_hands(self, game, state):
         hand = game.hands[0]
+        cards = {}
+        for a, b in zip(range(4), ['south','west','north','east']):
+            hand = game.hands[a]
+            cards[b] = {
+                'cards' : str(hand),
+                'suited' : hand.str_by_suit(),
+                'hcp' : hand.hcp,
+            }
         data = {
             'id' : game.id,
             'action' : state,
-            'hand' : {
-                'cards' : str(hand),
-                'hcp' : hand.hcp,
-            },
+            'hands' : cards,
         }
-        game.state = 'part_hand';
+        game.state = 'do_bid';
         return data
 
     def part_hand(self, game, state):
@@ -92,6 +104,7 @@ class Games(object):
             'action' : state,
             'hand' : {
                 'cards' : str(hand),
+                'suited' : hand.str_by_suit(),
                 'hcp' : hand.hcp,
             },
         }
