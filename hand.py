@@ -1,3 +1,4 @@
+from card import Card
 from opening import *
 
 class Hand(object):
@@ -6,18 +7,24 @@ class Hand(object):
         self._hcp = None
         self.open_seq = [o2CluStrong, o2NT, o1Maj5, o1MinBest, o2MajWeak, o2DiaWeak]
 
+    @staticmethod
+    def from_str(txt):
+        h = Hand()
+        for c in txt.split():
+            h.add(Card.from_str(c))
+        return h
+            
+
     def add(self, card):
         self.cards.append(card)
-        self.cards.sort()
         
     def sorted(self):
         return sorted(self.cards)
         
     def analyze(self):
-        self._hcp = sum([max(c.val-8, 0) for c in self.cards])
+        self.cards.sort()
+        self._hcp = sum([max(c.num-8, 0) for c in self.cards])
         self._length = [sum(1 for crd in self.cards if crd.sut == sut) for sut in range(4)]
-        for sut in range(4):
-            print sut, sum(1 for crd in self.cards if crd.sut == sut)
         
     @property    
     def hcp(self):
@@ -37,6 +44,9 @@ class Hand(object):
     
     def has_maj5(self):
         return max(self._length[2:]) >= 5
+        
+    def has_maj4(self):
+        return max(self._length[2:]) >= 4
         
     def length(self, ind=0):
         return sorted(self._length, reverse=True)[ind]
@@ -70,6 +80,25 @@ class Hand(object):
                 break
         if not bid:
             bid = Bid.parse('pass')
+            name = 'Pass'        
+        data = {
+            'name' : bid.str,
+            'symb' : bid.sym,
+            'color' : bid.col,
+            'text' : name,
+        }
+        return data, bid.sut, bid.cls
+
+    def reply(self, sut, cls):
+        print cls
+        print cls.reply
+        for r in cls.reply:
+            bid = r.check(self, sut)
+            name = r.name
+            if bid:
+                break
+        if not bid:
+            bid = Bid.parse('pass')
             name = 'Pass'
         data = {
             'name' : bid.str,
@@ -77,27 +106,19 @@ class Hand(object):
             'color' : bid.col,
             'text' : name,
         }
-        return data
+        return data, bid.sut, bid.cls
 
-    def str_by_suit(self):
+
+    def by_suit(self):
         res = {}
-        for sut, sym in zip(range(4), ['c', 'd', 'h', 's']):
-            res[sym] = [self.fixval(c.val) for c in sorted(self.cards, reverse=True) if c.sut==sut]
+        for sym in ['c', 'd', 'h', 's']:
+            res[sym] = [c.val for c in sorted(self.cards, reverse=True) if c.sym == sym]
         return res
-
-    def fixval(self, num):
-        if num < 8:
-            return str(num + 2)
-        else:
-            return 'TJQKA'[num - 8];
-
 
     def __str__(self):
         return ' '.join([str(c) for c in self.cards])
 
     def pretty(self):
-        print [str(c) for c in self.sorted()]
-        print [str(c) for c in reversed(self.sorted())]
         ret = ''
         for sut in reversed(range(4)):
             ret += ''.join(c.valsym() if c.sut == sut else '' for c in reversed(self.sorted())) + '\n'
@@ -105,7 +126,7 @@ class Hand(object):
 
 def main():
     from deck import Deck
-    d = Deck().shuffle()
+    d = Deck(1).shuffle()
     print d
     g = d.deal()
     print
@@ -113,9 +134,11 @@ def main():
         print f
     print
     h = g[0]
+    h.analyze()
     print h
+    print "hcp:", h.hcp
     print
-    print h.str_by_suit()
+    print h.by_suit()
 
 
 if __name__ == '__main__':

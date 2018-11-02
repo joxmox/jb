@@ -5,27 +5,30 @@ class Bid(object):
 # other, val = 1,2,3,4,5,6,7
 
     @staticmethod
-    def parse(txt):
+    def parse(txt, cls=None):
         txt = txt.lower()
         try:
             if txt == 'x':
-                return Bid(1, 5)
+                return Bid(1, 5, cls)
             elif txt == 'xx':
-                return Bid(2, 5)
+                return Bid(2, 5, cls)
             elif txt[0] == 'p':
-                return Bid(0, 5)
+                return Bid(0, 5, cls)
             else:
                 val = int(txt[0])
                 sym = 'cdhsn'.index(txt[1])
                 if val < 1 or val > 7:
-                    return Bid(3, 5)
-                return Bid(val - 1, sym)
+                    return Bid(3, 5, cls)
+                return Bid(val - 1, sym, cls)
         except Exception:
-            return Bid(3, 5)
+            return Bid(3, 5, cls)
 
-    def __init__(self, val, sut):
+    def __init__(self, val, sut, cls=None):
+        if cls is not None:
+            print cls
         self._val = val
         self._sut = sut
+        self._cls = cls
         if sut == 0:
             self._col = 'grn'
         elif sut == 1:
@@ -49,6 +52,10 @@ class Bid(object):
                 return '?'
         else:
             return str(val + 1) + 'cdhsn'[sut]
+
+    @property
+    def cls(self):
+        return self._cls
 
     @property
     def val(self):

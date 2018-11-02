@@ -1,24 +1,34 @@
 class CardError(Exception):
     pass
 
-
 class Card(object):
-    def __init__(self, num):
-        if not str(num).isdigit() or num < 0 or num > 51:
+
+    values = '23456789TJQKA'
+    suits = 'cdhs'
+
+    def __init__(self, data):
+        if not str(data).isdigit() or data < 0 or data > 51:
             raise CardError('invalid input to card generation')
-        self._num = num
-        self._val = self._num % 13
-        self._sut = self._num // 13
+        self._data = data
+        self._num = self._data % 13
+        self._val = Card.values[self._num]
+        self._sut = self._data // 13
+        self._sym = Card.suits[self._sut]
+        self._crd = self._val + self._sym
         
-    def get_num(self):
-        return self._num
+
+    @staticmethod
+    def from_str(txt):
+        val, sym = list(txt)
+        num = '23456789TJQKA'.index(val)
+        data = Card.suits.index(sym) * 13 + num
+        return Card(data)
         
-    def get_val(self):
-        return self._val
-    
-    def _set_card(self, num):
-        raise CardError('cannot resassign card value')
-        
+
+    @property
+    def data(self):
+        return self._data
+
     @property
     def num(self):
         return self._num
@@ -32,22 +42,18 @@ class Card(object):
         return self._sut
 
     @property
-    def str(self):
-        return str(self)
-        
-    def valsym(self):
-        return '23456789TJQKA'[self._val]
-        
-    def sutsym(self):
-        return 'cdhs'[self._sut]
-        
+    def sym(self):
+        return self._sym
+
+    @property
+    def crd(self):
+        return self._crd
+
     def __gt__(self, other):
-        return self._num > other._num
+        return self._sut > other._sut or (self._sut == other._sut and self._num > other._num)
         
-    def __ge__(self, other):
-        return self._num >= other._num
+    def __le__(self, other):
+        return self._sut < other._sut or (self._sut == other._sut and self._num <= other._num)
 
     def __str__(self):
-        v = '23456789TJQKA'[self._val]
-        c = 'cdhs'[self._sut]
-        return v + c
+        return self.crd

@@ -8,10 +8,8 @@ from bid import Bid
 class Game(object):
 
     def __init__(self, id, num, dealer, zone):
-        if num == 0:
-            num = random.randint(1, 100000)
-        self.num = num
         self.deck = Deck(num)
+        self.num = self.deck.num
         self.deck.shuffle()
         self.hands = self.deck.deal()
         for h in self.hands:
@@ -22,6 +20,7 @@ class Game(object):
         self.opened = False
         self.dealer = dealer
         self.bidder = dealer
+        self.bids = []
 
 
 class Games(object):
@@ -40,32 +39,29 @@ class Games(object):
 
     def new(self, data):
         id = Games.nextid
-        print "new", id
         try:
-            num = int(data['num'])
+            num = int(data.get('num', 0))
         except ValueError:
             num = 0
-        print "num", num
         Games.nextid += 1
         self.games[id] = Game(id, num, 0, None)
         game = self.games[id]
+        game.id = id
         return {
             'id' : id,
+            'num' : game.num,
         }
 
     def next(self, id):
         id = int(id)
-        print "id", id
         game = self.games[id]
         state = game.state
         if state not in self.funcmap:
             state = 'end_game'
-        print "state", state
         func = self.funcmap[state]
         return func(game, state)
 
     def deal_info(self, game, state):
-        print "deal_info"
         data = {
             'id' : game.id,
             'action' : state,
@@ -86,7 +82,7 @@ class Games(object):
             hand = game.hands[a]
             cards[b] = {
                 'cards' : str(hand),
-                'suited' : hand.str_by_suit(),
+                'suited' : hand.by_suit(),
                 'hcp' : hand.hcp,
             }
         data = {
@@ -104,7 +100,7 @@ class Games(object):
             'action' : state,
             'hand' : {
                 'cards' : str(hand),
-                'suited' : hand.str_by_suit(),
+                'suited' : hand.by_suit(),
                 'hcp' : hand.hcp,
             },
         }
@@ -115,7 +111,14 @@ class Games(object):
         time.sleep(1)
         hand = game.hands[game.bidder]
         if game.bidder == 0 or game.bidder == 2:
-            bid = hand.try_open()
+            if game.opened:
+                bid, sut, cls = game.bids[-2]
+                bid, sut, cls = hand.reply(sut, cls)
+                
+            else:
+                bid, sut, cls  = hand.try_open()
+                if bid['name'] != 'Pass':
+                    game.opened = True
         else:
             bid = {
                 'name' : 'Pass',
@@ -123,6 +126,9 @@ class Games(object):
                 'color' : 'blk',
                 'text' : 'Pass',
             }
+            sut = None
+            cls = None
+        game.bids.append([bid, sut, cls])
         if bid['name'] == 'Pass':
             game.passcnt += 1
         else:

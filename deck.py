@@ -6,9 +6,17 @@ from card import Card
 
 class Deck(object):
     def __init__(self, num=0):
-        self._num = num
+        if num == 0:
+            self._num = random.randint(1, 100000)
+        else:
+            self._num = num
         self._cards = [Card(x) for x in range(52)]
 #       self.logger = logging.getLogger(__name__)
+
+
+    @property
+    def num(self):
+        return self._num
 
     @property
     def cards(self):
@@ -32,8 +40,15 @@ class Deck(object):
     def __str__(self):
         ret = ''
         for i, c in enumerate(self._cards):
-            ret += str(c) + ' '
+            ret += c.crd + ' '
             if i % 13 == 12:
                 ret += '\n'
         return ret
 
+def main():
+    d = Deck().shuffle()
+    print d
+    
+
+if __name__ == '__main__':
+    main()

@@ -20,7 +20,6 @@ class JbHandler(BaseHTTPRequestHandler):
     games = Games()
 
     def prelude(self):
-        print(self.path)
         path = self.path
         if len(path) > 0 and path[0] == '/':
             path = path[1:]
@@ -46,22 +45,19 @@ class JbHandler(BaseHTTPRequestHandler):
         return status
 
     def respond(self, code=200, ctype='text/html', data=None):
-        print "respond", data
         self.send_response(code)
         if ctype is not None:
             self.send_header('Content-Type', ctype)
         if data:
-            jdata = json.dumps(data)
+            jdata = json.dumps(data, indent=2)
             self.send_header('Content-Length', len(jdata))
         self.end_headers()
         if data:
-            print jdata
             self.wfile.write(jdata)
 
 
 
     def serve_file(self, file):
-        print ("serving file", file)
         if os.path.exists(file):
             if '.' in file:
                 suff = (file + '.').split('.')[-2]
@@ -77,13 +73,11 @@ class JbHandler(BaseHTTPRequestHandler):
     def api_get(self):
         if len(self.pat) == 2 and self.pat[0] == 'game':
             data = JbHandler.games.next(self.pat[1])
-            print data
             self.respond(200, data=data)
         else:
             self.respond(404)
 
     def api_post(self):
-        print "post", self.pat
         if len(self.pat) == 1 and self.pat[0] == 'game':
             self.respond(200, data=JbHandler.games.new(self.data))
         else:
@@ -92,7 +86,6 @@ class JbHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.prelude():
             return
-        print ("pat", self.pat)
         if self.pat == ['']:
             self.pat = ['index.html']
         if len(self.pat) == 1:
